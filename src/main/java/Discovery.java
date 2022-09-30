@@ -11,10 +11,24 @@ import java.net.http.HttpResponse;
 public class Discovery {
     private static final String TEST_URL = "https://authenticatie-ti.vlaanderen.be/op/.well-known/openid-configuration";
     private static final String PRODUCTION_URL = "https://authenticatie.vlaanderen.be/op/.well-known/openid-configuration";
+    private String url;
+
+    public Discovery(){
+        this("");
+    }
+
+    public Discovery(String url){
+        if(url == "production"){
+            this.url = PRODUCTION_URL;
+        }
+        else{
+            this.url = TEST_URL;
+        }
+    }
 
     private JSONObject getURLs() throws URISyntaxException, InterruptedException, IOException {
         var client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder().uri(new URI(TEST_URL)).GET().header("accept", "application/json").build();
+        HttpRequest request = HttpRequest.newBuilder().uri(new URI(url)).GET().header("accept", "application/json").build();
         var response = client.send(request, HttpResponse.BodyHandlers.ofString());
         String body = response.body();
         JSONObject jsonObject = (JSONObject) JSONValue.parse(body);
@@ -36,5 +50,12 @@ public class Discovery {
     public String getTokenEndpoint() throws URISyntaxException, IOException, InterruptedException {
         return (String) getURLs().get("token_endpoint");
     }
+
+    public String getIssuer() throws URISyntaxException, IOException, InterruptedException {
+        return (String) getURLs().get("issuer");
+    }
+
+
+
 
 }
